@@ -494,10 +494,16 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 		fwrite (buff , sizeof(char), buff_p-buff, typeProtoFile);
 	} else { // global
 		//printf("p_s->decl_end %ld s:%ld\n",p_s->decl_end, s);
+		
 		endOfName = s+l;
-		memcpy ( p_s->out, s, l );
-		p_s->out += l;
+		//memcpy ( p_s->out, s, l );
+		//p_s->out += l;
 		if (p_s->decl_end>endOfName){ // not a macro
+			if (is_pub==0){
+				p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "static ");
+			}
+			memcpy ( p_s->out, s, l );
+			p_s->out += l;
 			length = p_s->decl_end - endOfName;
 			memcpy ( p_s->out, endOfName, length );
 			p_s->out += length;
@@ -515,6 +521,8 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 			}
 			p_s->out = p_s->buff_start;
 		} else { // this is a macro
+			memcpy ( p_s->out, s, l );
+			p_s->out += l;
 			fwrite (p_s->buff_start,
 				sizeof(char),
 				p_s->out-p_s->buff_start,
