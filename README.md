@@ -8,4 +8,6 @@ Uses lemon, but the Makefile will take care of that for you.
 
 Clone from git, then `$ make`
 
-Browse the Makefile for more information.
+Browse the Wiki for more details on florida_c.
+
+Browse the Makefile for more information on building.
