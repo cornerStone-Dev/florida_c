@@ -1,8 +1,8 @@
-# proto_gen_parsing
+# florida_c
 
-This will generate an .h file with prototypes for you based on all ".c" files in current directory. It places prototypes.h into protogen/ local directory.
+This project is a translator for a dialect of the C programming language.
 
-Requires local directory protogen/, gcc, make, and re2c. If on Ubunutu intall build-essential and re2c.
+To build the project requires gcc, make, and re2c. If on Ubunutu intall build-essential and re2c.
 
 Uses lemon, but the Makefile will take care of that for you.
 
