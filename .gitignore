@@ -1,7 +1,5 @@
 # ignored files
 bin/
-c_src/
-fl_src/
 test/
 tool/
 tool_output/

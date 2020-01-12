@@ -241,6 +241,7 @@ struct_declaration_list ::= struct_declaration.
 struct_declaration_list ::= struct_declaration_list struct_declaration.
 
 struct_declaration ::= specifier_qualifier_list struct_declarator_list SEMI. // different from standard
+struct_declaration ::= MACRO.
 
 //~ specifier_qualifier_list ::= specifier_qualifier_list type_specifier.
 //~ specifier_qualifier_list ::= specifier_qualifier_list type_qualifier.
