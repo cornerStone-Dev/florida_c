@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 	
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
-				"#include \"fl_globals.h\"\n");
+				"#include \"globals.h\"\n");
 	
 	//printf("about to start\n");
 	while ( ((dir = readdir(d)) != NULL) /*&& (strstr(dir->d_name, ".c")!=0)*/ )
