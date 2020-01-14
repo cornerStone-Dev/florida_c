@@ -49,7 +49,7 @@ typedef struct parser_s{
 	Token       type_name;
 	Token       ident_type;
 	Token       fnptr_ident;
-	u8 *        dot_markers[256];
+	u8 *        dot_markers[350];
 	u32         is_ptr[2048];
 	u32         num_dots;
 	u32         line_num;
