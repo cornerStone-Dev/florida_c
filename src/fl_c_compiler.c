@@ -266,6 +266,8 @@ int main(int argc, char **argv)
 	fclose (globalsFile);
 	fflush (interfaceFile); 
 	fclose (interfaceFile);
+	fflush (includesFile); 
+	fclose (includesFile);
 	
 	
 	/*** De-comission parser * */
