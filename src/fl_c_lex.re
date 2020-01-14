@@ -3,7 +3,7 @@
 //#include <stdio.h>                   //    C/C++ code
 
 
-#define MAKE_TOKEN() t->s = (u8 *)start;t->l = (u32)(YYCURSOR - start)
+#define MAKE_TOKEN() t->s = (u8 *)start;t->l = (u32)(YYCURSOR - start);t->flags = *line_num
 /*!max:re2c*/                        // directive that defines YYMAXFILL (unused)
 /*!re2c                              // start of re2c block
     
@@ -11,6 +11,7 @@
     scm = "//" [^\n]* "\n";
     wsp = ([ \t\v\n\r] | scm | mcm)+;
     macro = "#" ([^\n] | "\\\n")* "\n";
+    local_macro = "##" ([^\n] | "\\\n")* "\n";
     // integer literals
 	oct = "0" [0-7]*;
 	dec = [1-9][0-9]*;
@@ -72,7 +73,22 @@ loop: // label for looping within the lexxer
                                      //
     * { start =YYCURSOR; goto loop; }//   default rule with its semantic action
     [\x00] { return 0; }             // EOF rule with null sentinal
-    
+
+    local_macro {
+        *YYCURSOR_p = YYCURSOR;
+        *start=' ';
+        start++;
+        MAKE_TOKEN();
+        while (start!=YYCURSOR){
+			if(*start=='\n'){
+				*line_num+=1;
+				//printf("macro, %d\n",*line_num);
+			}
+			start++;
+		}
+		return LOCAL_MACRO;
+    }
+
     macro {
         *YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
         while (start!=YYCURSOR){
@@ -84,7 +100,7 @@ loop: // label for looping within the lexxer
 		}
 		return MACRO;
     }
-    
+
     wsp {
 		while (start!=YYCURSOR){
 			if(*start=='\n'){
@@ -358,7 +374,7 @@ loop: // label for looping within the lexxer
 		*YYCURSOR_p = YYCURSOR;
 		*start=' ';
 		start++;
-		t->s = (u8 *)start;
+		MAKE_TOKEN();
 		*start='s';
 		start++;
 		*start='t';
@@ -370,7 +386,6 @@ loop: // label for looping within the lexxer
 		*start='i';
 		start++;
 		*start='c';
-		t->l = (u32)(YYCURSOR - t->s);
 		return  PERSIST ;
 	}
 	//"auto" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  AUTO ;}
@@ -378,7 +393,7 @@ loop: // label for looping within the lexxer
     //"static" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  STATIC ;}
     //"extern" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  EXTERN ;}
     
-    "pub" {*YYCURSOR_p = YYCURSOR;t->s = (u8*)(YYCURSOR-1);*t->s=' ';t->l = 1;return  PUB;}
+    "pub" {*YYCURSOR_p = YYCURSOR;start+=2;*start=' ';MAKE_TOKEN();return  PUB;}
     //"typedef" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  TYPEDEF ;}
 	"union" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  UNION ;}
 	"case" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  CASE ;}
@@ -400,6 +415,8 @@ loop: // label for looping within the lexxer
 	"inline" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  INLINE ;}
 	"noReturn" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  NORETURN ;}
 	"alignAs" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ALIGNAS ;}
+	"complex" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  COMPLEX ;}
+	"imaginary" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  IMAGINARY ;}
 
 
 

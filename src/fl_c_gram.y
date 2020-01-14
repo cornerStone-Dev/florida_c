@@ -68,6 +68,9 @@ external_declaration ::= function_definition.
 external_declaration ::= declaration(A).{ p_s->is_pub=type_decl(p_s, A.s, A.l, p_s->is_pub); }
 
 declaration ::=  MACRO.
+declaration ::=  LOCAL_MACRO.{p_s->local_macro = 1;}
+declaration(A) ::=  PUB MACRO(B).{p_s->is_pub = 1;A=B;}
+declaration(A) ::=  PUB LOCAL_MACRO(B).{p_s->is_pub = 1;p_s->local_macro = 1;A=B;}
 declaration ::=  declaration_specifiers init_declarator_list SEMI(A).{p_s->decl_end = A.s;}
 declaration ::=  declaration_specifiers SEMI(A). {p_s->decl_end = A.s;}// no change to parser size
 
@@ -102,7 +105,7 @@ function_definition ::= declaration_specifiers(A) function_declarator(D) compoun
 	// insert line number and file info
 	p_s->out += 
 		sprintf((char *)p_s->out,
-		"#line %d \"%s\"\n", p_s->func_start_line_num, p_s->file_name_buff);
+		"#line %d \"%s\"\n", A.flags, p_s->file_name_buff);
 	
 	
 	u8 * out_p=p_s->out;
@@ -120,11 +123,15 @@ function_definition ::= declaration_specifiers(A) function_declarator(D) compoun
 	// func prototypes
 	length = p_s->out - out_p;
 	memcpy ( buff, out_p, length );
-	buff[length]=';';
-	buff[length+1]='\n';
+	if (p_s->is_inline) {
+		p_s->is_inline=0;
+		stpcpy((char *)&buff[length], " __attribute__((always_inline));\n");
+	} else {
+		stpcpy((char *)&buff[length], ";\n");
+	}
 	fwrite (buff,
 			sizeof(char),
-			length+2,
+			strlen((const char *)buff),
 			funcProtoFile);
 	if (p_s->is_pub==1){
 		p_s->is_pub=0;
@@ -188,7 +195,7 @@ declaration_specifier ::= alignment_specifier.
 storage_class_specifier ::= PUB.{p_s->is_pub = 1;}
 storage_class_specifier ::= PERSIST.
 
-function_specifier ::= INLINE.
+function_specifier ::= INLINE.{p_s->is_inline = 1;}
 function_specifier ::= NORETURN.
 
 alignment_specifier ::= ALIGNAS LPAREN type_name RPAREN.
@@ -219,6 +226,8 @@ type_specifier ::= F_ID.
 //type_specifier ::= struct_or_union_id.
 type_specifier ::= struct_or_union_specifier.
 type_specifier ::= enum_specifier.
+type_specifier ::= COMPLEX.
+type_specifier ::= IMAGINARY.
 //type_specifier ::= TYPE_IDENT. //TODO change identifier
 
 type_qualifier ::= CONST.

@@ -64,6 +64,8 @@ typedef struct parser_s{
 	u8          is_custom_type;
 	u8          inside_function;
 	u8          printed_error;
+	u8          local_macro;
+	u8          is_inline;
 } ParserState;
 
 #include "../tool_output/fl_c_gram.h"
@@ -72,7 +74,7 @@ typedef struct parser_s{
 /* globals */
 
 static FILE * outputFile,* typeProtoFile, * typesFile,
-	* funcProtoFile, * globalsFile, * interfaceFile; 
+	* funcProtoFile, * globalsFile, * interfaceFile, * includesFile; 
 
 #include "../tool_output/fl_c_lex.c"
 #include "../tool_output/fl_c_gram.c"
@@ -85,6 +87,7 @@ static FILE * outputFile,* typeProtoFile, * typesFile,
 #define FL_STD_FILE     "c_src/fl_std.h"
 #define FL_GLOBALS_FILE "c_src/globals.h"
 #define INTERFACE_FILE  "c_src/interface.h"
+#define INCLUDES_FILE   "c_src/includes.h"
 
 int main(int argc, char **argv)
 {
@@ -143,6 +146,9 @@ int main(int argc, char **argv)
 	interfaceFile = fopen ( INTERFACE_FILE, "w" );
 	if (interfaceFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
+	includesFile = fopen ( INCLUDES_FILE, "w" );
+	if (includesFile==NULL) {fputs ("File error",stderr); exit (1);}
+	
 	/** Set up parser **/
 	pEngine = &sEngine;
 	ParseInit(pEngine, &p_s);
@@ -159,6 +165,10 @@ int main(int argc, char **argv)
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
 				"#include \"fl_std.h\"\n");
+	
+	output = (uint8_t *)stpcpy(
+				(char *)output, 
+				"#include \"includes.h\"\n");
 	
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
@@ -523,11 +533,43 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 		} else { // this is a macro
 			memcpy ( p_s->out, s, l );
 			p_s->out += l;
-			fwrite (p_s->buff_start,
-				sizeof(char),
-				p_s->out-p_s->buff_start,
-				typeProtoFile);
-			p_s->out = p_s->buff_start;
+			s++;
+			u8 is_include;
+			if( *s == 'i' 
+			 && (*(s+1) == 'n')
+			 && (*(s+2) == 'c') ) {
+				is_include = 1;
+			} else {
+				is_include = 0;
+			}
+			// flags at play: is_pub, local_macro, is_include
+			if (is_pub){
+				is_pub=0;
+				fwrite (p_s->buff_start,
+					sizeof(char),
+					p_s->out-p_s->buff_start,
+					interfaceFile);
+			}
+			if (p_s->local_macro){
+				p_s->local_macro = 0;
+				fwrite (p_s->buff_start,
+					sizeof(char),
+					p_s->out-p_s->buff_start,
+					outputFile);
+				p_s->out = p_s->buff_start;
+			} else if (is_include==1) {
+				fwrite (p_s->buff_start,
+					sizeof(char),
+					p_s->out-p_s->buff_start,
+					includesFile);
+				p_s->out = p_s->buff_start;
+			} else {
+				fwrite (p_s->buff_start,
+					sizeof(char),
+					p_s->out-p_s->buff_start,
+					typeProtoFile);
+				p_s->out = p_s->buff_start;
+			}
 		}
 	}
 	return is_pub;
