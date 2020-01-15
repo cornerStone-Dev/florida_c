@@ -1,6 +1,9 @@
 /*
  * grammar for a c-like language that is context free
 */
+/* florida_c compiler */
+/* PUBLIC DOMAIN */
+
 %include{
 #define YYNOERRORRECOVERY 1
 }
@@ -27,7 +30,7 @@
 %left  PLUS MINUS.
 %left  STAR DIVI MOD.
 %right DOLLAR ATSIGN SIZEOF NOT TILDA.
-%left  LPAREN RPAREN LBRACKET RBRACKET DOT. //ARROW
+%left  LPAREN RPAREN LBRACKET RBRACKET DOT ARROW.
 
 %syntax_error {
 	u8 * start_of_line=TOKEN.s;
@@ -46,10 +49,6 @@
 		}
 		end_of_line++;
 		*end_of_line=0;
-		//yypParser->yytos->minor.yy0.s[yypParser->yytos->minor.yy0.l] = 0;
-		//TOKEN.s[TOKEN.l] = 0;
-		//printf("top of stack: %s\n", yypParser->yytos->minor.yy0.s);
-		//printf("current context: %s\n", (TOKEN.s-20));
 		
 		printf("%s:%d: syntax error\n", p_s->file_name_buff, p_s->line_num);
 		printf("%s\n", start_of_line);
@@ -472,9 +471,9 @@ primary_expression ::= LPAREN expression RPAREN.
 constant ::= INTEGER.
 constant ::= FLOAT.
 constant ::= CHAR_LIT.
-             //~ | character_constant
-             //~ | floating_constant
-             //~ | enumeration_constant
+			 //~ | character_constant
+			 //~ | floating_constant
+			 //~ | enumeration_constant
 
 expression ::= assignment_expression.
 expression ::= expression COMMA assignment_expression.
@@ -530,12 +529,12 @@ direct_abstract_declarator ::= direct_abstract_declarator LPAREN RPAREN.
 direct_abstract_declarator ::= LBRACKET RBRACKET.
 direct_abstract_declarator ::= LPAREN RPAREN.
 
-enum_specifier ::= ENUM E_ID(A) LBLOCK enumerator_list RBLOCK.{/*add_to_type_table(p_s->lexer, A.s, A.l);*/
+enum_specifier ::= ENUM E_ID(A) LBLOCK enumerator_list RBLOCK.{
 	p_s->type_name = A;
 	p_s->is_enum = 1;
 	p_s->is_type = 1;
 }
-enum_specifier ::= ENUM E_ID(A) LBLOCK enumerator_list COMMA RBLOCK.{/*add_to_type_table(p_s->lexer, A.s, A.l);*/
+enum_specifier ::= ENUM E_ID(A) LBLOCK enumerator_list COMMA RBLOCK.{
 	p_s->type_name = A;
 	p_s->is_enum = 1;
 	p_s->is_type = 1;
@@ -544,13 +543,12 @@ enum_specifier ::= ENUM E_ID(A) LBLOCK enumerator_list COMMA RBLOCK.{/*add_to_ty
 enum_specifier ::= ENUM LBLOCK enumerator_list RBLOCK.
 enum_specifier ::= ENUM LBLOCK enumerator_list COMMA RBLOCK.
 enum_specifier ::= E_ID.
-//enum_specifier ::= ENUM identifier(A).{add_to_type_table(p_s->lexer, A.s, A.l);}
 
 enumerator_list ::= enumerator.
 enumerator_list ::= enumerator_list COMMA enumerator.
 
-enumerator ::= identifier(A). {/*add_to_type_table(p_s->lexer, A.s, A.l);*/} //TODO change when lexing types
-enumerator ::= identifier(A) ASSIGN constant_expression. {/*add_to_type_table(p_s->lexer, A.s, A.l);*/}
+enumerator ::= identifier.
+enumerator ::= identifier ASSIGN constant_expression.
 
 init_declarator_list ::= init_declarator.
 init_declarator_list ::= init_declarator_list COMMA init_declarator.
@@ -662,30 +660,5 @@ switch ::= SWITCH. {enter_scope(p_s->scopeList);}
 //~ paramlist ::= param.
 
 //~ param ::= type IDENT.
-
-//~ type ::= type ATSIGN.
-//~ type ::= type_qualifier U8.
-//~ type ::= type_qualifier S8.
-//~ type ::= type_qualifier U16.
-//~ type ::= type_qualifier S16.
-//~ type ::= type_qualifier U32.
-//~ type ::= type_qualifier S32.
-//~ type ::= type_qualifier U64.
-//~ type ::= type_qualifier S64.
-//~ type ::= type_qualifier F32.
-//~ type ::= type_qualifier F64.
-//~ type ::= type_qualifier VOID.
-//~ type ::= type_qualifier IDENT.
-
-//~ type_qualifier ::= CONST.
-//~ type_qualifier ::= VOLATILE.
-//~ type_qualifier ::= .
-
-
-
-
-
-
-
 
 

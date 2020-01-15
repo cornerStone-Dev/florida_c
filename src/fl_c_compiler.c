@@ -1,12 +1,5 @@
-/* here is the code start */
-
-/*
- * type_decls.h
- * function_ptrs.h
- * type_defs.h
- * function_prototypes.h
- * 
- * */
+/* florida_c compiler */
+/* PUBLIC DOMAIN */
 
 
 #include <stdio.h>
@@ -37,7 +30,7 @@ typedef struct{
 	u8 * cursor_stack[64];
 	u32  item_count_stack[64];
 	u32  scopeIdx;
-	u8   table[32768];
+	u8   table[65536];
 } ScopeList;
 
 typedef struct parser_s{
@@ -49,8 +42,8 @@ typedef struct parser_s{
 	Token       type_name;
 	Token       ident_type;
 	Token       fnptr_ident;
-	u8 *        dot_markers[350];
-	u32         is_ptr[2048];
+	u8 *        dot_markers[550];
+	u32         is_ptr[4096];
 	u32         num_dots;
 	u32         line_num;
 	u32         func_start_line_num;
@@ -69,7 +62,22 @@ typedef struct parser_s{
 } ParserState;
 
 #include "../tool_output/fl_c_gram.h"
-#include "../gen/prototypes.h"
+/* function prototypes */
+static s32
+add_to(ScopeList * restrict str_l, u8 * restrict s, u32  l);
+static s32
+is_within(ScopeList * restrict str_l, u8 * restrict s, u32  l);
+static u8 *
+indx_within(ScopeList * restrict str_l, u32  indx, u8 * restrict output);
+static void
+enter_scope(ScopeList * restrict scope_l);
+static inline void
+leave_scope(ScopeList * restrict scope_l);
+static u8 *
+add_restrict(u8 ** sp, u32 l, u8 * out, u8 * proto_end);
+static u8
+type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub);
+/* end funtion prototypes */
 
 /* globals */
 
@@ -80,14 +88,15 @@ static FILE * outputFile,* typeProtoFile, * typesFile,
 #include "../tool_output/fl_c_gram.c"
 
 //#define INTPUT_FILE "input/weeklystat.c"
-#define OUTPUT_FILE     "c_src/source.c"
-#define TYPE_PROTO      "c_src/type_proto.h"
-#define TYPES           "c_src/types.h"
-#define FUNC_PROTO      "c_src/func_proto.h"
-#define FL_STD_FILE     "c_src/fl_std.h"
-#define FL_GLOBALS_FILE "c_src/globals.h"
-#define INTERFACE_FILE  "c_src/interface.h"
-#define INCLUDES_FILE   "c_src/includes.h"
+#define DEFAULT_DIR     "c_src/"
+#define OUTPUT_FILE     "source.c"
+#define TYPE_PROTO      "type_proto.h"
+#define TYPES           "types.h"
+#define FUNC_PROTO      "func_proto.h"
+#define FL_STD_FILE     "fl_std.h"
+#define FL_GLOBALS_FILE "globals.h"
+#define INTERFACE_FILE  "interface.h"
+#define INCLUDES_FILE   "includes.h"
 
 int main(int argc, char **argv)
 {
@@ -95,9 +104,11 @@ int main(int argc, char **argv)
 	unsigned char * data;
 	void *pEngine;     /* The LEMON-generated LALR(1) parser */
 	yyParser sEngine;  /* Space to hold the Lemon-generated Parser object */
-	unsigned char output_string[32768] = {0};
+	unsigned char output_string[65536] = {0};
 	//unsigned char file_name_buff[512] = {0};
 	unsigned char * output = output_string;
+	u8 dirName[512];
+	u8 * dirName_p;
 	Token token = {0};
 	ScopeList scopeList={0};
 	int tmp_token;
@@ -107,15 +118,33 @@ int main(int argc, char **argv)
 	unsigned char * buffer;
 	size_t result;
 	DIR *d;
-    struct dirent *dir;
-    p_s.scopeList = &scopeList;
-    p_s.out = output;
-    p_s.buff_start = output_string;
+	struct dirent *dir;
+	p_s.scopeList = &scopeList;
+	p_s.out = output;
+	p_s.buff_start = output_string;
 	scopeList.cursor_stack[0]=scopeList.table;
-	scopeList.end=&scopeList.table[8191];
+	scopeList.end=&scopeList.table[65535];
+	
+	// end output fl_std file
+	//~ printf("argc: %d\n", argc);
+	//~ for (s32 x=0; x<argc; x++){
+		//~ printf("%d:%s\n", x, argv[x]);
+	//~ }
+	
+	if ( (argc > 1)
+	  && (argv[1][0]=='-')
+	  && (argv[1][1]=='d') 
+	  && (strlen(&argv[1][2])<498) ) 
+	{
+		dirName_p = (u8*)stpcpy((char *)dirName, &argv[1][2]);
+		dirName_p = (u8*)stpcpy((char *)dirName_p, "/");
+	} else {
+		dirName_p = (u8*)stpcpy((char *)dirName, DEFAULT_DIR);
+	}
 	
 	// write out fl_std file
-	typeProtoFile = fopen ( FL_STD_FILE, "w" );
+	strcpy((char *)dirName_p, FL_STD_FILE);
+	typeProtoFile = fopen ( (const char *)dirName, "w" );
 	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
 	output = (uint8_t *)stpcpy(
@@ -125,28 +154,34 @@ int main(int argc, char **argv)
 	fflush (typeProtoFile); 
 	fclose (typeProtoFile);
 	output = output_string;
-	// end output fl_std file
 	
 	// open all output files
-	typeProtoFile = fopen ( TYPE_PROTO, "w" );
+	strcpy((char *)dirName_p, TYPE_PROTO);
+	typeProtoFile = fopen ( (const char *)dirName, "w" );
 	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	typesFile = fopen ( TYPES, "w" );
+	strcpy((char *)dirName_p, TYPES);
+	typesFile = fopen ( (const char *)dirName, "w" );
 	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	funcProtoFile = fopen ( FUNC_PROTO, "w" );
+	strcpy((char *)dirName_p, FUNC_PROTO);
+	funcProtoFile = fopen ( (const char *)dirName, "w" );
 	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	outputFile = fopen ( OUTPUT_FILE, "w" );
+	strcpy((char *)dirName_p, OUTPUT_FILE);
+	outputFile = fopen ( (const char *)dirName, "w" );
 	if (outputFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	globalsFile = fopen ( FL_GLOBALS_FILE, "w" );
+	strcpy((char *)dirName_p, FL_GLOBALS_FILE);
+	globalsFile = fopen ( (const char *)dirName, "w" );
 	if (globalsFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	interfaceFile = fopen ( INTERFACE_FILE, "w" );
+	strcpy((char *)dirName_p, INTERFACE_FILE);
+	interfaceFile = fopen ( (const char *)dirName, "w" );
 	if (interfaceFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
-	includesFile = fopen ( INCLUDES_FILE, "w" );
+	strcpy((char *)dirName_p, INCLUDES_FILE);
+	includesFile = fopen ( (const char *)dirName, "w" );
 	if (includesFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
 	/** Set up parser **/
@@ -156,7 +191,7 @@ int main(int argc, char **argv)
 	/* open current directory */
 	d = opendir("fl_src");
 	if (d==0)
-    {
+	{
 		//printf("NO DIR!!!\n");
 		return -1;
 	}
@@ -250,9 +285,6 @@ int main(int argc, char **argv)
 	/* close directory */
 	closedir(d);
 	
-	//p_s.out = output;
-	//fwrite (output_string , sizeof(char), strlen((const char *)output_string), outputFile);
-	
 	/* flush file out of cache and close all files */
 	fflush (outputFile); 
 	fclose (outputFile);
@@ -278,7 +310,7 @@ int main(int argc, char **argv)
 	} else {
 		rcode = 0;
 	}
-    return rcode;
+	return rcode;
 }
 
 static s32
@@ -325,7 +357,7 @@ is_within(ScopeList * restrict str_l, u8 * restrict s, u32  l)
 	u8   len;
 	
 	
-	/* one comparision */
+	/* search backwards, view as a stack */
 	while ( cursor >= start )
 	{
 		len = (*cursor);
@@ -364,9 +396,9 @@ is_within(ScopeList * restrict str_l, u8 * restrict s, u32  l)
 	return -1;
 }
 
-/* search type table for IDENT */
+/* search type table at index */
 static u8 *
-indx_within(ScopeList * restrict str_l, u32  indx, u8 * restrict output)
+indx_within(ScopeList * restrict str_l, u32 indx, u8 * restrict output)
 {
 	u8 * cursor = str_l->cursor_stack[str_l->scopeIdx]-1;
 	s32  idx = str_l->item_count_stack[str_l->scopeIdx];
@@ -457,7 +489,7 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 	u32 length;
 	u8  buff[256];
 	buff_p = buff;
-	if (p_s->is_type) {
+	if (p_s->is_type) { //type to be typedef'ed
 		p_s->is_type=0;
 		p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "typedef ");
 		buff_p = (uint8_t *)stpcpy((char *)buff_p, "typedef ");
@@ -490,7 +522,7 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 				sizeof(char),
 				p_s->out-p_s->buff_start,
 				typesFile);
-		if (is_pub){
+		if (is_pub){ // declared public, export to interface header
 			is_pub=0;
 			fwrite (p_s->buff_start,
 			sizeof(char),
@@ -511,7 +543,7 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 		//memcpy ( p_s->out, s, l );
 		//p_s->out += l;
 		if (p_s->decl_end>endOfName){ // not a macro
-			if (is_pub==0){
+			if (is_pub==0){ // default is static "scoping"
 				p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "static ");
 			}
 			memcpy ( p_s->out, s, l );
@@ -524,7 +556,7 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 				sizeof(char),
 				p_s->out-p_s->buff_start,
 				globalsFile);
-			if (is_pub){
+			if (is_pub){ // declared public, export to interface header
 				is_pub=0;
 				fwrite (p_s->buff_start,
 				sizeof(char),
@@ -545,27 +577,27 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 				is_include = 0;
 			}
 			// flags at play: is_pub, local_macro, is_include
-			if (is_pub){
+			if (is_pub){ // declared public, export to interface header
 				is_pub=0;
 				fwrite (p_s->buff_start,
 					sizeof(char),
 					p_s->out-p_s->buff_start,
 					interfaceFile);
 			}
-			if (p_s->local_macro){
+			if (p_s->local_macro){ // output to source e.g. ifdef on functions
 				p_s->local_macro = 0;
 				fwrite (p_s->buff_start,
 					sizeof(char),
 					p_s->out-p_s->buff_start,
 					outputFile);
 				p_s->out = p_s->buff_start;
-			} else if (is_include==1) {
+			} else if (is_include==1) { // includes are put at the top
 				fwrite (p_s->buff_start,
 					sizeof(char),
 					p_s->out-p_s->buff_start,
 					includesFile);
 				p_s->out = p_s->buff_start;
-			} else {
+			} else { // macros are put into prototypes file to make "global"
 				fwrite (p_s->buff_start,
 					sizeof(char),
 					p_s->out-p_s->buff_start,

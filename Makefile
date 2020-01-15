@@ -1,7 +1,7 @@
 
 all: bin tool tool_output gen bin/flct
 
-bin/flct: src/fl_c_compiler.c tool_output/fl_c_gram.c tool_output/fl_c_lex.c gen/prototypes.h
+bin/flct: src/fl_c_compiler.c tool_output/fl_c_gram.c tool_output/fl_c_lex.c
 	time gcc -O2 -s -o bin/flct src/fl_c_compiler.c -Wall
 	size bin/flct
 
@@ -20,13 +20,6 @@ tool/lempar.c:
 
 tool_output/fl_c_lex.c: src/fl_c_lex.re
 	re2c -W --eager-skip src/fl_c_lex.re -o tool_output/fl_c_lex.c
-
-gen/prototypes.h: src/*.c prototype_generator/bin/protoGenCompiler
-	./prototype_generator/bin/protoGenCompiler
-
-prototype_generator/bin/protoGenCompiler:
-	git clone --depth 1 --quiet https://github.com/cornerStone-Dev/prototype_generator.git
-	(cd prototype_generator && make)
 
 bin:
 	mkdir bin

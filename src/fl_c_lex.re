@@ -1,18 +1,17 @@
-/*!re2c re2c:flags:i = 1; */         // re2c block with configuration that turns off #line directives
-                                     //
-//#include <stdio.h>                   //    C/C++ code
+/* florida_c compiler */
+/* PUBLIC DOMAIN */
 
 
 #define MAKE_TOKEN() t->s = (u8 *)start;t->l = (u32)(YYCURSOR - start);t->flags = *line_num
 /*!max:re2c*/                        // directive that defines YYMAXFILL (unused)
 /*!re2c                              // start of re2c block
-    
+	
 	mcm = "/*" ([^*] | ("*" [^/]))* "*""/"; // WILL NOT WORK ON "**/" ending!!!!
-    scm = "//" [^\n]* "\n";
-    wsp = ([ \t\v\n\r] | scm | mcm)+;
-    macro = "#" ([^\n] | "\\\n")* "\n";
-    local_macro = "##" ([^\n] | "\\\n")* "\n";
-    // integer literals
+	scm = "//" [^\n]* "\n";
+	wsp = ([ \t\v\n\r] | scm | mcm)+;
+	macro = "#" ([^\n] | "\\\n")* "\n";
+	local_macro = "#@" ([^\n] | "\\\n")* "\n";
+	// integer literals
 	oct = "0" [0-7]*;
 	dec = [1-9][0-9]*;
 	hex = '0x' [0-9a-fA-F]+;
@@ -58,7 +57,7 @@
 
 static int lex(/*const*/ u8 **YYCURSOR_p, Token * t, u32 * line_num) // YYCURSOR is defined as a function parameter
 {                                    //
-    u8 * YYMARKER;    // YYMARKER is defined as a local variable
+	u8 * YYMARKER;    // YYMARKER is defined as a local variable
 	//const u8 * YYCTXMARKER; // YYCTXMARKER is defined as a local variable
 	/*const*/ u8 * YYCURSOR;    // YYCURSOR is defined as a local variable
 	/*const*/ u8 * start;
@@ -67,19 +66,20 @@ static int lex(/*const*/ u8 **YYCURSOR_p, Token * t, u32 * line_num) // YYCURSOR
 
 loop: // label for looping within the lexxer
 
-    /*!re2c                          // start of re2c block **/
-    re2c:define:YYCTYPE = "u8";      //   configuration that defines YYCTYPE
-    re2c:yyfill:enable  = 0;         //   configuration that turns off YYFILL
-                                     //
-    * { start =YYCURSOR; goto loop; }//   default rule with its semantic action
-    [\x00] { return 0; }             // EOF rule with null sentinal
+	/*!re2c                          // start of re2c block **/
+	re2c:define:YYCTYPE = "u8";      //   configuration that defines YYCTYPE
+	re2c:yyfill:enable  = 0;         //   configuration that turns off YYFILL
+									 //
+	* { start =YYCURSOR; goto loop; }//   default rule with its semantic action
+	[\x00] { return 0; }             // EOF rule with null sentinal
 
-    local_macro {
-        *YYCURSOR_p = YYCURSOR;
-        *start=' ';
-        start++;
-        MAKE_TOKEN();
-        while (start!=YYCURSOR){
+	local_macro {
+		*YYCURSOR_p = YYCURSOR;
+		*start=' ';
+		start++;
+		*start='#';
+		MAKE_TOKEN();
+		while (start!=YYCURSOR){
 			if(*start=='\n'){
 				*line_num+=1;
 				//printf("macro, %d\n",*line_num);
@@ -87,11 +87,11 @@ loop: // label for looping within the lexxer
 			start++;
 		}
 		return LOCAL_MACRO;
-    }
+	}
 
-    macro {
-        *YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
-        while (start!=YYCURSOR){
+	macro {
+		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
+		while (start!=YYCURSOR){
 			if(*start=='\n'){
 				*line_num+=1;
 				//printf("macro, %d\n",*line_num);
@@ -99,9 +99,9 @@ loop: // label for looping within the lexxer
 			start++;
 		}
 		return MACRO;
-    }
+	}
 
-    wsp {
+	wsp {
 		while (start!=YYCURSOR){
 			if(*start=='\n'){
 				*line_num+=1;
@@ -110,265 +110,265 @@ loop: // label for looping within the lexxer
 			start++;
 		}
 		goto loop;
-    }
+	}
  
-    integer {
+	integer {
 		*YYCURSOR_p = YYCURSOR;//MAKE_TOKEN();
 		return INTEGER;
-    }
+	}
 	
 	flt {
 		*YYCURSOR_p = YYCURSOR;//MAKE_TOKEN();
 		return FLOAT;
-    }
+	}
 	
 	string_lit {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return STR_LIT;
-    }
+	}
 
 	char_lit {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return CHAR_LIT;
-    }
+	}
 
 	lblock {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LBLOCK;
-    }
+	}
 	
 	rblock {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return RBLOCK;
-    }
+	}
 	
 	lparen { 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LPAREN;
-    }
-    
-    rparen {
+	}
+	
+	rparen {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return RPAREN;
-    }
+	}
 	
 	lbracket {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LBRACKET;
-    }
-    
-    rbracket {
+	}
+	
+	rbracket {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return RBRACKET;
-    }
+	}
 	
 	comma { 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return COMMA;
-    }
+	}
 	
 	star {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return STAR;
-    }
+	}
 	
 	atsign {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		*start='&';
 		return ATSIGN;
-    }
+	}
 	
 	dollar {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		*start='*';
 		return DOLLAR;
-    }
+	}
 
 	semi {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return SEMI;
-    }
+	}
 
 	u8 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return U8;
-    }
+	}
 
 	s8 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return S8;
-    }
+	}
 
 	u16 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return U16;
-    }
+	}
 
 	s16 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return S16;
-    }
+	}
 
 	u32 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return U32;
-    }
+	}
 
 	s32 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return S32;
-    }
+	}
 
 	u64 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return U64;
-    }
+	}
 
 	s64 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return S64;
-    }
+	}
 
 	f32 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return F32;
-    }
+	}
 
 	f64 {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return F64;
-    }
+	}
 
 	"=" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return ASSIGN;
-    }
+	}
 
 	"?" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return QMARK;
-    }
+	}
 
 	":" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return COLON;
-    }
+	}
 
 	"||" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LOGIC_OR;
-    }
+	}
 
 	"&&" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LOGIC_AND;
-    }
+	}
 
 	"&" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return AND;
-    }
+	}
 
 	"^" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return XOR;
-    }
+	}
 
 	"|" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return OR;
-    }
+	}
 
 	"==" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return EQUALS;
-    }
+	}
 
 	"!=" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return NOTEQUALS;
-    }
+	}
 
 	"<" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LT;
-    }
+	}
 
 	">" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return GT;
-    }
+	}
 
 	"<=" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LTEQ;
-    }
+	}
 
 	">=" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return GTEQ;
-    }
+	}
 
 	"<<" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return LBITSHIFT;
-    }
+	}
 
 	">>" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return RBITSHIFT;
-    }
+	}
 
 	"+" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return PLUS;
-    }
+	}
 
 	"-" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return MINUS;
-    }
+	}
 
 	"/" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return DIVI;
-    }
+	}
 
 	"%" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return MOD;
-    }
+	}
 
 	//~ "++" {
 		//~ *YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		//~ return INCREMENT;
-    //~ }
+	//~ }
 
 	//~ "--" {
 		//~ *YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		//~ return DECREMENT;
-    //~ }
+	//~ }
 
 	"." {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return DOT;
-    }
+	}
 
 	"..." {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return DOTDOTDOT;}
 
 	"*=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  MULASSIGN ;}
-    "/=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  DIVASSIGN ;}
-    "%=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  MODASSIGN ;}
-    "+=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ADDASSIGN ;}
-    "-=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  SUBASSIGN ;}
-    "<<=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return LSHASSIGN ;}
-    ">>=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return RSHASSIGN ;}
-    "&=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ANDASSIGN ;}
-    "^=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  XORASSIGN ;}
-    "|=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ORASSIGN  ;}
-    "~" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  TILDA  ;}
-    "!" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  NOT ;}
-    "->" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ARROW ;}
+	"/=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  DIVASSIGN ;}
+	"%=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  MODASSIGN ;}
+	"+=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ADDASSIGN ;}
+	"-=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  SUBASSIGN ;}
+	"<<=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return LSHASSIGN ;}
+	">>=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return RSHASSIGN ;}
+	"&=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ANDASSIGN ;}
+	"^=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  XORASSIGN ;}
+	"|=" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ORASSIGN  ;}
+	"~" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  TILDA  ;}
+	"!" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  NOT ;}
+	"->" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ARROW ;}
 
 	"persist" {
 		*YYCURSOR_p = YYCURSOR;
@@ -389,12 +389,12 @@ loop: // label for looping within the lexxer
 		return  PERSIST ;
 	}
 	//"auto" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  AUTO ;}
-    //"register" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  REGISTER ;}
-    //"static" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  STATIC ;}
-    //"extern" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  EXTERN ;}
-    
-    "pub" {*YYCURSOR_p = YYCURSOR;start+=2;*start=' ';MAKE_TOKEN();return  PUB;}
-    //"typedef" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  TYPEDEF ;}
+	//"register" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  REGISTER ;}
+	//"static" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  STATIC ;}
+	//"extern" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  EXTERN ;}
+	
+	"pub" {*YYCURSOR_p = YYCURSOR;start+=2;*start=' ';MAKE_TOKEN();return  PUB;}
+	//"typedef" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  TYPEDEF ;}
 	"union" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  UNION ;}
 	"case" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  CASE ;}
 	"default" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  DEFAULT ;}
@@ -418,65 +418,59 @@ loop: // label for looping within the lexxer
 	"complex" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  COMPLEX ;}
 	"imaginary" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  IMAGINARY ;}
 
-
-
-
-
-
-
 	"sizeof" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return SIZEOF;
-    }
+	}
 
 	"void" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return VOID;
-    }
+	}
 
 	"volatile" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return VOLATILE;
-    }
+	}
 
 	"const" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return CONST;
-    }
+	}
 
 	"struct" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return STRUCT;
-    }
-    
-    "fnptr" {
+	}
+	
+	"fnptr" {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return FNPTR;
-    }
+	}
 
 	return {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return RETURN;
-    }
-    
-    e_id {
+	}
+	
+	e_id {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return E_ID;
-    }
-    
-    f_id {
+	}
+	
+	f_id {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return F_ID;
-    }
-    
-    s_id {
+	}
+	
+	s_id {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return S_ID;
-    }
+	}
 
 	t_id {
 		// record string 
@@ -486,20 +480,20 @@ loop: // label for looping within the lexxer
 		start++;
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return T_ID;
-    }
+	}
 
 	u_id {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return U_ID;
-    }
+	}
 
 	id {
 		// record string 
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		return IDENT;
-    }
-    */                               // end of re2c block
+	}
+	*/                               // end of re2c block
 }  
 
 
