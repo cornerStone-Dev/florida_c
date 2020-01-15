@@ -11,3 +11,7 @@ Clone from git, then `$ make`
 Browse the Wiki for more details on florida_c.
 
 Browse the Makefile for more information on building.
+
+## Usage
+
+Currently florida_c has one command line option, -dDIR_NAME where you can specify the output directory. The default is "c_src".
