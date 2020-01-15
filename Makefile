@@ -1,5 +1,5 @@
 
-all: bin tool tool_output gen bin/flct
+all: bin tool tool_output bin/flct
 
 bin/flct: src/fl_c_compiler.c tool_output/fl_c_gram.c tool_output/fl_c_lex.c
 	time gcc -O2 -s -o bin/flct src/fl_c_compiler.c -Wall
@@ -29,9 +29,6 @@ tool:
 
 tool_output:
 	mkdir tool_output
-
-gen:
-	mkdir gen
 
 clean:
 	rm -f bin/flct
