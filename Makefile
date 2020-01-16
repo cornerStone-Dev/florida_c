@@ -6,7 +6,7 @@ bin/flct: src/fl_c_compiler.c tool_output/fl_c_gram.c tool_output/fl_c_lex.c
 	size bin/flct
 
 tool_output/fl_c_gram.c: tool/lemon src/fl_c_gram.y
-	./tool/lemon src/fl_c_gram.y -s -dtool_output
+	./tool/lemon src/fl_c_gram.y -s -dtool_output -q
 	sed -i 's/void Parse/static void Parse/g' tool_output/fl_c_gram.c
 
 tool/lemon: tool/lemon.c tool/lempar.c
