@@ -225,7 +225,7 @@ int main(int argc, char **argv)
 	while ( ((dir = readdir(d)) != NULL) /*&& (strstr(dir->d_name, ".c")!=0)*/ )
 	{
 		//printf("Got in\n");
-		if ( (strstr(dir->d_name, ".fl")!=0) ) {
+		if ( (strstr(dir->d_name, ".fl.c")!=0) ) {
 		//printf("%s\n", dir->d_name);
 		p_s.line_num=1;
 		output = (uint8_t *)stpcpy((char *)output, "/* src/");
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
 		sprintf((char *)p_s.file_name_buff, "fl_src/%s", dir->d_name);
 
 		pFile = fopen ( (char *)p_s.file_name_buff, "rb" );
-		if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
+		if (pFile==NULL) {fputs ("File error, cannot open source file",stderr); exit (1);}
 		
 		
 		
