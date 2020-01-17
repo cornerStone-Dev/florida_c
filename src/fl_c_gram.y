@@ -66,12 +66,12 @@ external_declaration ::= external_declaration declaration(A). { p_s->is_pub=type
 external_declaration ::= function_definition.
 external_declaration ::= declaration(A).{ p_s->is_pub=type_decl(p_s, A.s, A.l, p_s->is_pub); }
 
-declaration ::=  MACRO.
-declaration ::=  LOCAL_MACRO.{p_s->local_macro = 1;}
-declaration(A) ::=  PUB MACRO(B).{p_s->is_pub = 1;A=B;}
-declaration(A) ::=  PUB LOCAL_MACRO(B).{p_s->is_pub = 1;p_s->local_macro = 1;A=B;}
-declaration ::=  declaration_specifiers init_declarator_list SEMI(A).{p_s->decl_end = A.s;}
-declaration ::=  declaration_specifiers SEMI(A). {p_s->decl_end = A.s;}// no change to parser size
+declaration(A) ::=  MACRO(B).{p_s->decl_end = B.s;A=B;}
+declaration(A) ::=  LOCAL_MACRO(B).{p_s->decl_end = B.s;p_s->local_macro = 1;A=B;}
+declaration(A) ::=  PUB MACRO(B).{p_s->decl_end = B.s;p_s->is_pub = 1;A=B;}
+declaration(A) ::=  PUB LOCAL_MACRO(B).{p_s->decl_end = B.s;p_s->is_pub = 1;p_s->local_macro = 1;A=B;}
+declaration(A) ::=  declaration_specifiers(B) init_declarator_list SEMI(C).{p_s->decl_end = C.s;A=B;}
+declaration(A) ::=  declaration_specifiers(B) SEMI(C). {p_s->decl_end = C.s;A=B;}// no change to parser size
 
 function_definition ::= FNPTR declaration_specifiers(C) funcptr_declarator SEMI(E).{
 	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "typedef ");

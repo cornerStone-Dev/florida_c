@@ -550,6 +550,7 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 			p_s->out += l;
 			length = p_s->decl_end - endOfName;
 			memcpy ( p_s->out, endOfName, length );
+			//printf("not a macro length%d\n", length);
 			p_s->out += length;
 			p_s->out = (uint8_t *)stpcpy((char *)p_s->out, ";\n");
 			fwrite (p_s->buff_start,
