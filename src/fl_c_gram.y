@@ -50,7 +50,7 @@
 		end_of_line++;
 		*end_of_line=0;
 		
-		printf("%s:%d: syntax error\n", p_s->file_name_buff, p_s->line_num);
+		printf("%s:%d: syntax error on token %d\n", p_s->file_name_buff, p_s->line_num, yymajor);
 		printf("%s\n", start_of_line);
 	}
 	
@@ -366,6 +366,7 @@ pointer ::= pointer pointer_t.
 
 pointer_t ::= DOLLAR.
 pointer_t ::= DOLLAR type_qualifier. // could add second type_qualifier here
+pointer_t ::= DOLLAR type_qualifier type_qualifier. 
 
 direct_declarator ::= identifier.
 //direct_declarator ::= LPAREN declarator RPAREN.
@@ -597,7 +598,7 @@ expression_statement ::= expression SEMI.
 expression_statement ::= SEMI.
 
 selection_statement ::= if LPAREN expression RPAREN compound_statement. {leave_scope(p_s->scopeList);}
-selection_statement ::= if LPAREN expression RPAREN compound_statement ELSE compound_statement. {leave_scope(p_s->scopeList);}
+selection_statement ::= if LPAREN expression RPAREN compound_statement ELSE statement. {leave_scope(p_s->scopeList);}
 selection_statement ::= switch LPAREN expression RPAREN compound_statement.  {leave_scope(p_s->scopeList);}
 
 iteration_statement ::= while LPAREN expression RPAREN compound_statement. {leave_scope(p_s->scopeList);}

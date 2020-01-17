@@ -92,6 +92,7 @@ loop: // label for looping within the lexxer
 	macro {
 		*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();
 		while (start!=YYCURSOR){
+			//printf("%c",*start);
 			if(*start=='\n'){
 				*line_num+=1;
 				//printf("macro, %d\n",*line_num);
