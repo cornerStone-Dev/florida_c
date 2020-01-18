@@ -58,7 +58,7 @@
 }
 
 translation_unit ::= external_declaration. {
-	printf("parse done, input exhausted\n");
+	//printf("parse done, input exhausted\n");
 }
 
 external_declaration ::= external_declaration function_definition.
