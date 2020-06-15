@@ -117,7 +117,7 @@ function_definition ::= declaration_specifiers(A) function_declarator(D) compoun
 	memcpy ( p_s->out, A.s, length );
 	p_s->out += length;
 	
-	//~ p_s->out = add_restrict(&D.s, D.l, p_s->out, p_s->funcProto_end);
+	p_s->out = add_restrict(&D.s, D.l, p_s->out, p_s->funcProto_end);
 	
 	// func prototypes
 	length = p_s->out - out_p;

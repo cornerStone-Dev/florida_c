@@ -464,10 +464,11 @@ add_restrict(u8 ** sp, u32 l, u8 * out, u8 * proto_end)
 	}
 	// s == '('
 	while (s!=proto_end) {
-		if (*s=='*'){
-			out = (uint8_t *)stpcpy((char *)out, "* restrict ");
-			s++;
-		} else {
+		//~ if (*s=='*'){
+			//~ out = (uint8_t *)stpcpy((char *)out, "* restrict ");
+			//~ s++;
+		//~ } else 
+		{
 		*out = *s;
 		s++;
 		out++;
