@@ -19,6 +19,14 @@
 
 typedef struct Xoken Token;
 
+typedef struct F_memset_type F_memset_type;
+
+typedef struct F_memset_type {
+	void * (*f)(void *, s32,   size_t);
+} F_memset_type;
+
+//typedef void * (*F_memset_type)(void *, s32,   size_t);
+
 typedef struct Xoken {
 	u8 * s;
 	u32  l;

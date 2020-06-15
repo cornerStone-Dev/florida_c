@@ -74,27 +74,61 @@ declaration(A) ::=  declaration_specifiers(B) init_declarator_list SEMI(C).{p_s-
 declaration(A) ::=  declaration_specifiers(B) SEMI(C). {p_s->decl_end = C.s;A=B;}// no change to parser size
 
 function_definition ::= FNPTR declaration_specifiers(C) funcptr_declarator SEMI(E).{
+	u8  buff[256];
+	u8 *buff_p;
+	buff_p = buff;
+	
 	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "typedef ");
+	buff_p = (uint8_t *)stpcpy((char *)buff_p, "typedef ");
+	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "struct ");
+	buff_p = (uint8_t *)stpcpy((char *)buff_p, "struct ");
+	// name of new type for function
+	memcpy ( p_s->out, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
+	p_s->out += p_s->fnptr_ident.l;
+	memcpy ( buff_p, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
+	buff_p += p_s->fnptr_ident.l;
+	// type prototype
+	buff_p = (uint8_t *)stpcpy((char *)buff_p, " ");
+	memcpy ( buff_p, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
+	buff_p += p_s->fnptr_ident.l;
+	buff_p = (uint8_t *)stpcpy((char *)buff_p, ";\n");
+	fwrite (buff , sizeof(char), buff_p-buff, typeProtoFile);
 	
+	// open up struct
+	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "{ ");
+	
+	// return types
 	u32 length = p_s->fnptr_ident.s - C.s;
-	
 	memcpy ( p_s->out, C.s, length );
 	p_s->out += length;
 	
-	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "(*");
-	memcpy ( p_s->out, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
-	p_s->out += p_s->fnptr_ident.l;
-	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, ")");
+	// name of new type for function
+	p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "(*f)");
+	//~ p_s->out = (uint8_t *)stpcpy((char *)p_s->out, "(*");
+	//~ memcpy ( p_s->out, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
+	//~ p_s->out += p_s->fnptr_ident.l;
+	//~ p_s->out = (uint8_t *)stpcpy((char *)p_s->out, ")");
 	
 	length = E.s - (p_s->fnptr_ident.s+p_s->fnptr_ident.l)+1;
 	
 	memcpy ( p_s->out, (p_s->fnptr_ident.s+p_s->fnptr_ident.l), length );
 	p_s->out += length;
-	p_s->out = (u8 *)stpcpy((char *)p_s->out, "\n");
+	p_s->out = (u8 *)stpcpy((char *)p_s->out, ";}");
+	memcpy ( p_s->out, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
+	p_s->out += p_s->fnptr_ident.l;
+	p_s->out = (u8 *)stpcpy((char *)p_s->out, ";\n");
 	fwrite (p_s->buff_start,
 			sizeof(char),
 			p_s->out-p_s->buff_start,
 			typesFile);
+	
+	if (p_s->is_pub){ // declared public, export to interface header
+		p_s->is_pub=0;
+		fwrite (p_s->buff_start,
+		sizeof(char),
+		p_s->out-p_s->buff_start,
+		interfaceFile);
+	}
 	p_s->out = p_s->buff_start;
 }
 
