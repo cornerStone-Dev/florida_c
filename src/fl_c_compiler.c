@@ -207,16 +207,16 @@ int main(int argc, char **argv)
 
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
+				"#include \"func_proto.h\"\n");
+
+	output = (uint8_t *)stpcpy(
+				(char *)output, 
 				"#include \"includes.h\"\n");
 
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
 				"#include \"types.h\"\n");
-	
-	output = (uint8_t *)stpcpy(
-				(char *)output, 
-				"#include \"func_proto.h\"\n");
-	
+
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
 				"#include \"globals.h\"\n");
