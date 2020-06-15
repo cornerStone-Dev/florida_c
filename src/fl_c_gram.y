@@ -113,7 +113,7 @@ function_definition ::= FNPTR declaration_specifiers(C) funcptr_declarator SEMI(
 	
 	memcpy ( p_s->out, (p_s->fnptr_ident.s+p_s->fnptr_ident.l), length );
 	p_s->out += length;
-	p_s->out = (u8 *)stpcpy((char *)p_s->out, ";}");
+	p_s->out = (u8 *)stpcpy((char *)p_s->out, "}");
 	memcpy ( p_s->out, p_s->fnptr_ident.s, p_s->fnptr_ident.l);
 	p_s->out += p_s->fnptr_ident.l;
 	p_s->out = (u8 *)stpcpy((char *)p_s->out, ";\n");
