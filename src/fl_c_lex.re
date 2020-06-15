@@ -411,7 +411,7 @@ loop: // label for looping within the lexxer
 	"enum" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ENUM ;}
 	"alignOf" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ALIGNOF ;}
 	"bool" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  BOOL ;}
-	//"restrict" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  RESTRICT ;}
+	"restrict" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  RESTRICT ;}
 	"atomic" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  ATOMIC ;}
 	"inline" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  INLINE ;}
 	"noReturn" {*YYCURSOR_p = YYCURSOR;MAKE_TOKEN();return  NORETURN ;}

@@ -162,11 +162,11 @@ int main(int argc, char **argv)
 	
 	strcpy((char *)dirName_p, TYPES);
 	typesFile = fopen ( (const char *)dirName, "w" );
-	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
+	if (typesFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
 	strcpy((char *)dirName_p, FUNC_PROTO);
 	funcProtoFile = fopen ( (const char *)dirName, "w" );
-	if (typeProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
+	if (funcProtoFile==NULL) {fputs ("File error",stderr); exit (1);}
 	
 	strcpy((char *)dirName_p, OUTPUT_FILE);
 	outputFile = fopen ( (const char *)dirName, "w" );
@@ -203,12 +203,12 @@ int main(int argc, char **argv)
 	
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
-				"#include \"includes.h\"\n");
-	
+				"#include \"type_proto.h\"\n");
+
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
-				"#include \"type_proto.h\"\n");
-	
+				"#include \"includes.h\"\n");
+
 	output = (uint8_t *)stpcpy(
 				(char *)output, 
 				"#include \"types.h\"\n");

@@ -117,7 +117,7 @@ function_definition ::= declaration_specifiers(A) function_declarator(D) compoun
 	memcpy ( p_s->out, A.s, length );
 	p_s->out += length;
 	
-	p_s->out = add_restrict(&D.s, D.l, p_s->out, p_s->funcProto_end);
+	//~ p_s->out = add_restrict(&D.s, D.l, p_s->out, p_s->funcProto_end);
 	
 	// func prototypes
 	length = p_s->out - out_p;
@@ -231,7 +231,7 @@ type_specifier ::= IMAGINARY.
 
 type_qualifier ::= CONST.
 type_qualifier ::= VOLATILE.
-//type_qualifier ::= RESTRICT.
+type_qualifier ::= RESTRICT.
 type_qualifier ::= ATOMIC.
 
 struct_or_union_def ::= struct_or_union struct_or_union_id(A).{
