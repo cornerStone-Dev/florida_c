@@ -582,11 +582,11 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 			if( *s == 'i' 
 			 && (*(s+1) == 'n')
 			 && (*(s+2) == 'c') ) {
-				u8 *cursor = s+l;
-				while(*cursor!='\"'){cursor--;}
-				cursor--;
-				if(*cursor=='c'
-					&& (*(cursor-1) == '.') ) {
+				u32 index = l;
+				while((s[index]!='\"')&&(index>12)){index--;}
+				index--;
+				if( (s[index]=='c')
+					&& (s[index-1] == '.') ) {
 					is_include = 1;
 				}
 			}
