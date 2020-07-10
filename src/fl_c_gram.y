@@ -57,9 +57,9 @@
 	while( yypParser->yytos>yypParser->yystack ) yy_pop_parser_stack(yypParser);
 }
 
-translation_unit ::= external_declaration. {
+translation_unit ::= external_declaration. //{
 	//printf("parse done, input exhausted\n");
-}
+//}
 
 external_declaration ::= external_declaration function_definition.
 external_declaration ::= external_declaration declaration(A). { p_s->is_pub=type_decl(p_s, A.s, A.l, p_s->is_pub); }

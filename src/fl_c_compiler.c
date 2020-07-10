@@ -578,13 +578,17 @@ type_decl(ParserState * p_s, u8 * restrict s, u32  l, u8 is_pub)
 			memcpy ( p_s->out, s, l );
 			p_s->out += l;
 			s++;
-			u8 is_include;
+			u8 is_include=0;
 			if( *s == 'i' 
 			 && (*(s+1) == 'n')
 			 && (*(s+2) == 'c') ) {
-				is_include = 1;
-			} else {
-				is_include = 0;
+				u8 *cursor = s+l;
+				while(*cursor!='\"'){cursor--;}
+				cursor--;
+				if(*cursor=='c'
+					&& (*(cursor-1) == '.') ) {
+					is_include = 1;
+				}
 			}
 			// flags at play: is_pub, local_macro, is_include
 			if (is_pub){ // declared public, export to interface header
