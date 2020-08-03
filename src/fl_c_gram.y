@@ -494,7 +494,7 @@ postfix_expression(C) ::= postfix_expression(B) DOT(A) identifier(D). { // work 
 		C.l=D.l; // record ident information
 	}
 }
-postfix_expression ::= postfix_expression ARROW identifier.
+//postfix_expression ::= postfix_expression ARROW identifier.
 postfix_expression ::= LPAREN type_name RPAREN LBLOCK initializer_list RBLOCK. // anonymous decl
 postfix_expression ::= LPAREN type_name RPAREN LBLOCK initializer_list COMMA RBLOCK. // anonymous decl
 
