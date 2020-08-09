@@ -500,8 +500,11 @@ postfix_expression ::= LPAREN type_name RPAREN LBLOCK initializer_list COMMA RBL
 
 primary_expression ::= identifier.
 primary_expression ::= constant.
-primary_expression ::= STR_LIT.
+primary_expression ::= string_literal.
 primary_expression ::= LPAREN expression RPAREN.
+
+string_literal ::= STR_LIT. 
+string_literal ::= string_literal STR_LIT. 
 
 constant ::= INTEGER.
 constant ::= FLOAT.
